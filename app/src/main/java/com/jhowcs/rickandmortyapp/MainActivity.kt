@@ -3,13 +3,10 @@ package com.jhowcs.rickandmortyapp
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import com.jhowcs.rickandmortyapp.model.Character
+import com.jhowcs.rickandmortyapp.model.Result
+import com.jhowcs.rickandmortyapp.repository.CharactersRepository
 import com.jhowcs.rickandmortyapp.service.CharacterService
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
+import com.jhowcs.rickandmortyapp.service.RestApi
 
 class MainActivity : AppCompatActivity() {
 
@@ -17,25 +14,19 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val retrofit = Retrofit.Builder()
-            .baseUrl("https://rickandmortyapi.com/api/")
-            .addConverterFactory(MoshiConverterFactory.create())
-            .build()
-
+        val retrofit = RestApi("https://rickandmortyapi.com/api/").getRetrofit()
         val service: CharacterService = retrofit.create(CharacterService::class.java)
-
-        service.getAllCharacters().enqueue(object : Callback<Character> {
-            override fun onFailure(call: Call<Character>, t: Throwable) {
-                Log.d("CharCall", "failed: ${t.message}")
+        val repository = CharactersRepository(service)
+        repository.getAllCharacters(object : CharactersCallback {
+            override fun onError(message: String) {
+                Log.d("CharCall", "failed: $message")
             }
 
-            override fun onResponse(call: Call<Character>, response: Response<Character>) {
-                response.body()?.results?.forEach {
+            override fun onSuccess(results: List<Result>) {
+                results.forEach {
                     Log.d("CharCall", it.name)
                 }
             }
-
         })
-
     }
 }
