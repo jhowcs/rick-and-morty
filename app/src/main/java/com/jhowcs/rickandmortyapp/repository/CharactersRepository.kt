@@ -6,8 +6,9 @@ import com.jhowcs.rickandmortyapp.service.CharacterService
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import javax.inject.Inject
 
-class CharactersRepository(private val service: CharacterService) {
+class CharactersRepository @Inject constructor(private val service: CharacterService) {
 
     fun getAllCharacters(callback: CharactersCallback) {
         service.getAllCharacters().enqueue(object : Callback<Character> {
